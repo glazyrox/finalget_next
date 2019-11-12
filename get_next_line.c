@@ -6,13 +6,13 @@
 /*   By: rgwayne- <rgwayne-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/06/08 19:32:26 by rgwayne-          #+#    #+#             */
-/*   Updated: 2019/06/30 23:30:57 by rgwayne-         ###   ########.fr       */
+/*   Updated: 2019/07/09 20:39:55 by rgwayne-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int				ft_find(char *gnl)
+int				find(char *gnl)
 {
 	int			i;
 
@@ -42,10 +42,10 @@ int				ft_endit(char *ends)
 
 int				cycle(char **src, char **line)
 {
-	if (ft_find(*src) >= 0)
+	if (find(*src) >= 0)
 	{
-		*line = ft_strsub(*src, 0, ft_find(*src));
-		*src = ft_fstrsub(*src, ft_find(*src) + 1, ft_strlen(*src), 1);
+		*line = ft_strsub(*src, 0, find(*src));
+		*src = ft_fsb(*src, find(*src) + 1, ft_strlen(*src), 1);
 		return (1);
 	}
 	if (ft_endit(*src))
@@ -74,27 +74,27 @@ int				ft_return(int cnt, char *src)
 int				get_next_line(const int fd, char **line)
 {
 	char		arr[BUFF_SIZE + 1];
-	static char	*src;
+	static char	*src[SIZE];
 	int			cnt;
 
-	if (fd < 0 || line == NULL)
+	if (fd < 0 || !line || (fd > SIZE))
 		return (-1);
 	ft_bzero(arr, BUFF_SIZE + 1);
 	while ((cnt = read(fd, arr, BUFF_SIZE)) > 0)
 	{
-		if (src)
-			src = ft_fstrjoin(src, arr, 1);
+		if (src[fd])
+			src[fd] = ft_fstrjoin(src[fd], arr, 1);
 		else
-			src = ft_strdup(arr);
-		if (ft_find(src) >= 0)
+			src[fd] = ft_strdup(arr);
+		if (find(src[fd]) >= 0)
 		{
-			*line = ft_strsub(src, 0, ft_find(src));
-			src = ft_fstrsub(src, ft_find(src) + 1, ft_strlen(src), 1);
+			*line = ft_strsub(src[fd], 0, find(src[fd]));
+			src[fd] = ft_fsb(src[fd], find(src[fd]) + 1, ft_strlen(src[fd]), 1);
 			return (1);
 		}
 		ft_bzero(arr, BUFF_SIZE + 1);
 	}
-	while ((cnt = read(fd, arr, BUFF_SIZE)) == 0 && src)
-		return (cycle(&src, line));
-	return (ft_return(cnt, src));
+	while ((cnt = read(fd, arr, BUFF_SIZE)) == 0 && src[fd])
+		return (cycle(&src[fd], line));
+	return (ft_return(cnt, src[fd]));
 }
